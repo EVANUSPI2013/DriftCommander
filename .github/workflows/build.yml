@@ -1,39 +1,22 @@
 name: Build APK
-on: [push, pull_request]
-
+on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-
-      - name: Install dependencies
+          python-version: "3.10"
+      - name: Install Briefcase
+        run: pip install briefcase
+      - name: Build APK
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            build-essential git python3-dev ffmpeg libsdl2-dev \
-            libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
-            libportmidi-dev libswscale-dev libavformat-dev \
-            libavcodec-dev zlib1g-dev libgstreamer1.0-dev \
-            gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
-            openjdk-17-jdk unzip zip
-          pip install --upgrade pip
-          pip install buildozer cython==0.29.33
-
-      - name: Build with Buildozer
-        # We use env variables instead of 'yes |' to avoid Broken Pipes!
-        run: buildozer -v android debug
-        env:
-          BUILDOZER_WARN_ON_ROOT: "0"
-          APP_ANDROID_ACCEPT_SDK_LICENSE: "1"
-
+          briefcase create android --no-input
+          briefcase build android --no-input
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: package
-          path: bin/*.apk
+          name: Drift-Commander-APK
+          path: build/drifter/android/gradle/app/build/outputs/apk/debug/*.apk
