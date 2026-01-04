@@ -3,18 +3,36 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build with Buildozer
-        uses: ArtemSerebriakov/buildozer-action@v1
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          buildozer_version: master
-          python_version: 3.11
-          buildozer_cmd: buildozer android debug
-          # This tells the action to handle the "Yes" to licenses for us
-          save_build_dir: true
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential git python3-dev ffmpeg libsdl2-dev \
+            libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
+            libportmidi-dev libswscale-dev libavformat-dev \
+            libavcodec-dev zlib1g-dev libgstreamer1.0-dev \
+            gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
+            openjdk-17-jdk unzip zip
+          pip install --upgrade pip
+          pip install buildozer cython==0.29.33
+
+      - name: Build with Buildozer
+        # This part forces the 'yes' and bypasses the root warning 
+        # which caused your EOFError earlier!
+        run: |
+          export BUILDOZER_WARN_ON_ROOT=0
+          yes | buildozer -v android debug
+        env:
+          APP_ANDROID_ACCEPT_SDK_LICENSE: "1"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
