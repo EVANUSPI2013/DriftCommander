@@ -3,38 +3,18 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install System Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            build-essential git python3-dev ffmpeg libsdl2-dev \
-            libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
-            libportmidi-dev libswscale-dev libavformat-dev \
-            libavcodec-dev zlib1g-dev libgstreamer1.0-dev \
-            gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
-            openjdk-17-jdk unzip zip wget
-          pip install --upgrade pip
-          pip install buildozer cython==0.29.33
-
-      - name: Install Android Build-Tools (The Fix)
-        run: |
-          mkdir -p ~/.buildozer/android/platform/android-sdk/build-tools/34.0.0
-          # We are manually installing the 'aidl' tool it's crying about
-          sudo apt-get install -y google-android-build-tools-34.0.0-installer || true
-          sudo apt-get install -y aapt aidl zipalign
-
       - name: Build with Buildozer
-        run: |
-          export BUILDOZER_WARN_ON_ROOT=0
-          export APP_ANDROID_ACCEPT_SDK_LICENSE=1
-          # The 'yes' command handles any stray prompts
-          yes | buildozer -v android debug
-        env:
-          ACCEPT_SDK_LICENSE: "yes"
+        uses: ArtemSerebriakov/buildozer-action@v1
+        with:
+          buildozer_version: master
+          python_version: 3.11
+          buildozer_cmd: buildozer android debug
+          # This tells the action to handle the "Yes" to licenses for us
+          save_build_dir: true
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
