@@ -7,12 +7,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install dependencies
+      - name: Install System Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -21,16 +16,25 @@ jobs:
             libportmidi-dev libswscale-dev libavformat-dev \
             libavcodec-dev zlib1g-dev libgstreamer1.0-dev \
             gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
-            openjdk-17-jdk unzip zip
+            openjdk-17-jdk unzip zip wget
           pip install --upgrade pip
           pip install buildozer cython==0.29.33
 
+      - name: Install Android Build-Tools (The Fix)
+        run: |
+          mkdir -p ~/.buildozer/android/platform/android-sdk/build-tools/34.0.0
+          # We are manually installing the 'aidl' tool it's crying about
+          sudo apt-get install -y google-android-build-tools-34.0.0-installer || true
+          sudo apt-get install -y aapt aidl zipalign
+
       - name: Build with Buildozer
-        # This forces 'yes' to every license and bypasses the 'root' check
         run: |
           export BUILDOZER_WARN_ON_ROOT=0
           export APP_ANDROID_ACCEPT_SDK_LICENSE=1
+          # The 'yes' command handles any stray prompts
           yes | buildozer -v android debug
+        env:
+          ACCEPT_SDK_LICENSE: "yes"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
