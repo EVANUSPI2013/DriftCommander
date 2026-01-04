@@ -1,0 +1,74 @@
+# drift.kv
+<RootWidget>:
+    orientation: 'vertical'
+    canvas.before:
+        Color:
+            rgba: 0, 0, 0, 1  # Nothing Phone Black
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    # Top Navigation / Connection Area
+    BoxLayout:
+        size_hint_y: 0.15
+        padding: 10
+        spacing: 15
+        Button:
+            id: joy_btn
+            text: "SCAN PS5"
+            on_release: root.scan_joysticks()
+        Button:
+            id: bt_btn
+            text: "LINK HC-05"
+            on_release: root.connect_bluetooth()
+
+    # Center-Zero Gauges Area
+    BoxLayout:
+        orientation: 'horizontal'
+        padding: [60, 40]
+        spacing: 100
+        
+        # Left Gauge
+        Widget:
+            canvas:
+                Color:
+                    rgba: 0.1, 0.1, 0.1, 1
+                Rectangle:
+                    pos: self.center_x - 20, self.y
+                    size: 40, self.height
+                Color:
+                    rgba: 0, 1, 1, 1 # Cyan
+                Rectangle:
+                    pos: self.center_x - 20, self.center_y
+                    size: 40, (root.l_val * (self.height / 2))
+                Color:
+                    rgba: 1, 1, 1, 1
+                Ellipse: # The Neutral Dot
+                    pos: self.center_x - 5, self.center_y - 5
+                    size: 10, 10
+
+        # Right Gauge
+        Widget:
+            canvas:
+                Color:
+                    rgba: 0.1, 0.1, 0.1, 1
+                Rectangle:
+                    pos: self.center_x - 20, self.y
+                    size: 40, self.height
+                Color:
+                    rgba: 0, 1, 1, 1 # Cyan
+                Rectangle:
+                    pos: self.center_x - 20, self.center_y
+                    size: 40, (root.r_val * (self.height / 2))
+                Color:
+                    rgba: 1, 1, 1, 1
+                Ellipse: # The Neutral Dot
+                    pos: self.center_x - 5, self.center_y - 5
+                    size: 10, 10
+
+    # Status Bar
+    Label:
+        size_hint_y: 0.1
+        text: "--- DRIFT ACTIVE ---" if root.drifting else "STABLE"
+        color: (1, 0, 0, 1) if root.drifting else (0.5, 0.5, 0.5, 1)
+        font_size: '18sp'
