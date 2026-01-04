@@ -26,12 +26,10 @@ jobs:
           pip install buildozer cython==0.29.33
 
       - name: Build with Buildozer
-        # This part forces the 'yes' and bypasses the root warning 
-        # which caused your EOFError earlier!
-        run: |
-          export BUILDOZER_WARN_ON_ROOT=0
-          yes | buildozer -v android debug
+        # We use env variables instead of 'yes |' to avoid Broken Pipes!
+        run: buildozer -v android debug
         env:
+          BUILDOZER_WARN_ON_ROOT: "0"
           APP_ANDROID_ACCEPT_SDK_LICENSE: "1"
 
       - name: Upload APK
