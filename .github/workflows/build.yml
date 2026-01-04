@@ -4,11 +4,17 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
+    # This uses the official Kivy/Buildozer "container"
+    container: kivy/buildozer:latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build APK with Buildozer
-        # Using a specialized action is safer than manual scripts
-        uses: GearScrep/buildozer-action@v1
+      - name: Build with Buildozer
+        run: |
+          # We fix permissions and run buildozer directly
+          git config --global --add safe.directory /__w/DriftCommander/DriftCommander
+          buildozer -v android debug
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
-          buildozer_version: master
-          python_version: 3.11
+          name: package
+          path: bin/*.apk
